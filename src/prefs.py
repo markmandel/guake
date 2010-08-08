@@ -196,6 +196,12 @@ class PrefsCallbacks(object):
         val = int(spin.get_value())
         self.client.set_int(KEY('/general/history_size'), val)
 
+    def on_monitorinput_changed(self, monitor):
+        """Changes the monitor
+ 	"""
+        val = monitor.get_active()
+ 	self.client.set_int(KEY('/general/monitor'), val)
+
     def on_scroll_output_toggled(self, chk):
         """Changes the activity of scroll_output in gconf
         """
@@ -310,6 +316,12 @@ class PrefsDialog(SimpleGladeApp):
         column.set_cell_data_func(renderer, self.cell_data_func)
         column.set_property('expand', False)
         treeview.append_column(column)
+
+        screen = self.get_widget('config-window').get_screen()
+        self.monitorinput = self.get_widget('monitorinput')
+        num_monitors = screen.get_n_monitors()
+        for i in range(num_monitors):
+            self.monitorinput.append_text('%s' % i)
 
         self.populate_shell_combo()
         self.populate_keys_tree()
@@ -477,6 +489,13 @@ class PrefsDialog(SimpleGladeApp):
         # tabbar
         value = self.client.get_bool(KEY('/general/window_tabbar'))
         self.get_widget('window_tabbar').set_active(value)
+
+        # monitor
+        combo = self.get_widget('monitorinput')
+        value = float(self.client.get_int(KEY('/general/monitor')))
+        for i in combo.get_model():
+            if i[0] == str(int(value)):
+                combo.set_active_iter(i.iter)
 
         # scrollbar
         value = self.client.get_bool(KEY('/general/use_scrollbar'))

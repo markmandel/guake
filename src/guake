@@ -780,6 +780,7 @@ class Guake(SimpleGladeApp):
         """
         # setting window in all desktops
         self.get_widget('window-root').stick()
+        monitor = self.client.get_int(KEY('/general/monitor'))
 
         # add tab must be called before window.show to avoid a
         # blank screen before adding the tab.
@@ -816,7 +817,10 @@ class Guake(SimpleGladeApp):
         is the window_height property, width is window_width and the
         horizontal alignment is given by window_alignment.
         """
+        monitor = self.client.get_int(KEY('/general/monitor'))
         screen = self.window.get_screen()
+        if monitor >= screen.get_n_monitors(): #if we disconnect some monitor
+            monitor = 0
         height = self.client.get_int(KEY('/general/window_height'))
         width = 100
         halignment = self.client.get_int(KEY('/general/window_halignment'))
@@ -824,19 +828,11 @@ class Guake(SimpleGladeApp):
         # get the rectangle just from the first/default monitor in the
         # future we might create a field to select which monitor you
         # wanna use
-        window_rect = screen.get_monitor_geometry(0)
+        window_rect = screen.get_monitor_geometry(monitor)
         total_width = window_rect.width
         window_rect.height = window_rect.height * height / 100
         window_rect.width = window_rect.width * width / 100
 
-        if width < total_width:
-            if halignment == ALIGN_CENTER:
-                window_rect.x = (total_width - window_rect.width) / 2
-            elif halignment == ALIGN_LEFT:
-                window_rect.x = 0
-            elif halignment == ALIGN_RIGHT:
-                window_rect.x = total_width - window_rect.width
-        window_rect.y = 0
         return window_rect
 
     def get_running_fg_processes(self):
